@@ -10,16 +10,14 @@ jobs:
     if: github.repository == 'langchain4j/langchain4j'
     strategy:
       matrix:
-        java_version: [ 8, 11, 17, 21 ]
+        java_version:
+          - 17
+          - 21
         include:
-          - java_version: '8'
-            included_modules: '-pl !langchain4j-ollama,!langchain4j-jlama,!langchain4j-local-ai,!langchain4j-milvus,!code-execution-engines/langchain4j-code-execution-engine-graalvm-polyglot,!langchain4j-cassandra,!langchain4j-infinispan,!langchain4j-neo4j,!langchain4j-opensearch,!langchain4j-azure-ai-search'
-          - java_version: '11'
-            included_modules: '-pl !langchain4j-ollama,!langchain4j-jlama,!langchain4j-local-ai,!langchain4j-milvus,!code-execution-engines/langchain4j-code-execution-engine-graalvm-polyglot,!langchain4j-infinispan,!langchain4j-neo4j'
           - java_version: '17'
-            included_modules: '-pl !langchain4j-ollama,!langchain4j-jlama,!langchain4j-local-ai,!langchain4j-milvus,!code-execution-engines/langchain4j-code-execution-engine-graalvm-polyglot'
+            included_modules: '-pl !langchain4j-jlama'
           - java_version: '21'
-            included_modules: '-pl !langchain4j-ollama,!langchain4j-local-ai,!langchain4j-milvus'
+            included_modules: ''
       max-parallel: 1
     runs-on: ubuntu-latest
     steps:
@@ -39,8 +37,19 @@ jobs:
           project_id: ${{ secrets.GCP_PROJECT_ID }}
           credentials_json: ${{ secrets.GCP_CREDENTIALS_JSON }}
 
-      - name: Build with JDK ${{ matrix.java_version }}
-        run: mvn -B -U --fail-at-end -Dmaven.test.failure.ignore=true ${{ matrix.included_modules }} verify
+      - name: Compile and unit-test with JDK ${{ matrix.java_version }}
+        run: |
+          mvn -B -U -T4C test javadoc:aggregate \
+            -Dmaven.test.failure.ignore=true \
+            -Dgib.disable=false -Dgib.referenceBranch=__branch_before \
+            ${{ matrix.included_modules }}
+
+      - name: Integration test with JDK ${{ matrix.java_version }}
+        run: |
+          mvn -B -U verify \
+            -Dmaven.test.failure.ignore=true \
+            -Dgib.disable=false -Dgib.referenceBranch=__branch_before \
+            ${{ matrix.included_modules }}
         env:
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
