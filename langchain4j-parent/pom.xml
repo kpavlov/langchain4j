@@ -47,6 +47,7 @@
         <elastic.version>8.15.3</elastic.version>
         <jackson.version>2.16.1</jackson.version>
         <jedis.version>5.0.0</jedis.version>
+        <jspecify.version>1.0.0</jspecify.version>
         <aws.java.sdk.version>2.21.44</aws.java.sdk.version>
         <github-api.version>1.318</github-api.version>
         <milvus-sdk-java.version>2.3.9</milvus-sdk-java.version>
@@ -201,6 +202,12 @@
                 <version>${junit.version}</version>
                 <type>pom</type>
                 <scope>import</scope>
+            </dependency>
+
+            <dependency>
+                <groupId>org.jspecify</groupId>
+                <artifactId>jspecify</artifactId>
+                <version>${jspecify.version}</version>
             </dependency>
 
             <dependency>
